@@ -7,7 +7,7 @@ from pyquil.quilbase import Pragma
 from forest_benchmarking.compilation import basic_compile
 
 
-def create_graph_state(graph: nx.Graph, use_pragmas=True):
+def create_graph_state(graph: nx.Graph):
     """Write a program to create a graph state according to the specified graph
 
     A graph state involves Hadamarding all your qubits and then applying a CZ for each
@@ -21,23 +21,18 @@ def create_graph_state(graph: nx.Graph, use_pragmas=True):
     how well we've done according to expected parities.
 
     :param graph: The graph. Nodes are used as arguments to gates, so they should be qubit-like.
-    :param use_pragmas: Use COMMUTING_BLOCKS pragmas to hint at the compiler
     :return: A program that constructs a graph state.
     """
     program = Program()
     for q in graph.nodes:
         program += H(q)
 
-    if use_pragmas:
-        program += Pragma('COMMUTING_BLOCKS')
+    program += Pragma('COMMUTING_BLOCKS')
     for a, b in graph.edges:
-        if use_pragmas:
-            program += Pragma('BLOCK')
+        program += Pragma('BLOCK')
         program += CZ(a, b)
-        if use_pragmas:
-            program += Pragma('END_BLOCK')
-    if use_pragmas:
-        program += Pragma('END_COMMUTING_BLOCKS')
+        program += Pragma('END_BLOCK')
+    program += Pragma('END_COMMUTING_BLOCKS')
 
     return program
 
